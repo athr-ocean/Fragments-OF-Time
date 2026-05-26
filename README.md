@@ -19,11 +19,6 @@ O projeto foi construído de forma nativa (Vanilla), sem o uso de frameworks ou 
 * **CSS3** - Estilização e interface responsiva.
 * **JavaScript** - Lógica do jogo, controle de estados, validação das respostas e transição de eras.
 
-## 🚀 Como Jogar
-
-O jogo pode ser executado diretamente no navegador. 
-
-*(Assim que ativar o GitHub Pages, adicione o link aqui)* 👉 **[Clique aqui para jogar online](https://athr-ocean.github.io/Fragments-OF-Time)**
 
 ### Execução Local
 
