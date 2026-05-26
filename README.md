@@ -18,3 +18,22 @@ O projeto foi construído de forma nativa (Vanilla), sem o uso de frameworks ou 
 * **HTML5** - Estruturação das telas e quizes.
 * **CSS3** - Estilização e interface responsiva.
 * **JavaScript** - Lógica do jogo, controle de estados, validação das respostas e transição de eras.
+
+
+## 📁 Estrutura de Arquivos e Pastas
+
+Para que o jogo funcione corretamente e o código se mantenha organizado, a estrutura do projeto deve seguir a ordem abaixo:
+
+```text
+meu-jogo/
+├── index.html              # Ponto de entrada do jogo. Abre o Canvas no navegador.
+├── css/
+│   └── style.css           # Estilos básicos (ex: reset de margens, centralizar o canvas).
+├── src/                    # Pasta principal contendo toda a lógica do jogo (Scripts)
+│   ├── main.js             # Loop principal do jogo e captura de inputs.
+│   ├── Renderer.js         # Lida com gráficos, partículas, iluminação e desenho (seu código de renderização).
+│   ├── data.js             # Configurações do mapa, variáveis globais (TILE, MAP_CONFIG).
+│   └── ...outros.js        # Outras classes (Player, Audio, etc).
+└── assets/                 # (Opcional) Arquivos estáticos
+    ├── img/                # Imagens (ex: image_c26797.png, image_c267b7.png)
+    └── audio/              # Efeitos sonoros e músicas
