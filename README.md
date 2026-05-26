@@ -4,27 +4,31 @@
 ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=flat-square&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23F7DF1E.svg?style=flat-square&logo=javascript&logoColor=black)
 
-Jogo web desenvolvido como projeto prático e avaliação principal da disciplina de **Introdução à Ciência da Computação** no curso de Bacharelado em Ciência da Computação da **UNIVASF** (Universidade Federal do Vale do São Francisco).
+Jogo web educativo desenvolvido como projeto prático e avaliação principal da disciplina de **Introdução à Ciência da Computação** no curso de Bacharelado em Ciência da Computação da **UNIVASF** (Universidade Federal do Vale do São Francisco).
 
-## 🎮 O Jogo
+## 📖 Enredo e Objetivo
 
-[Substitua este parágrafo por uma descrição direta e curta da mecânica do jogo. Exemplo: Jogo de estilo arcade onde o jogador controla um personagem que precisa coletar fragmentos enquanto desvia de obstáculos em ordem cronológica.]
+A história acompanha o jovem Lucas e seu avô que, ao explorarem a garagem, encontram uma antiga máquina do tempo danificada. Por acidente, Lucas é puxado para dentro de um vórtex temporal e enviado para o passado.
 
-### Controles
-* **Movimentação:** `Setas` ou `W A S D`
-* **Ação:** `Espaço`
+Para conseguir voltar para casa, o jogador deve guiar Lucas por diferentes períodos da história da tecnologia, passando por todas as **gerações de computadores** (desde o ENIAC até os anos 2000). O avanço entre as eras ocorre através da resolução de quizzes sobre a evolução da computação.
+
+## 🛠️ Detalhes Técnicos
+
+O projeto foi construído de forma nativa (Vanilla), sem o uso de frameworks ou bibliotecas externas:
+* **HTML5** - Estruturação das telas e quizes.
+* **CSS3** - Estilização e interface responsiva.
+* **JavaScript** - Lógica do jogo, controle de estados, validação das respostas e transição de eras.
 
 ## 🚀 Como Jogar
 
-Você pode testar o jogo diretamente no navegador. 
+O jogo pode ser executado diretamente no navegador. 
 
-Se o projeto estiver publicado no GitHub Pages, acesse:  
-👉 **[Clique aqui para jogar](https://seu-usuario.github.io/nome-do-repositorio)** *(Substitua pelo seu link)*
+*(Assim que ativar o GitHub Pages, adicione o link aqui)* 👉 **[Clique aqui para jogar online](https://seu-usuario.github.io/Fragments-OF-Time)**
 
 ### Execução Local
 
-Caso queira baixar e rodar na sua máquina:
+Caso queira baixar o projeto para a sua máquina:
 
 1. Clone o repositório:
    ```bash
-   git clone [https://github.com/seu-usuario/nome-do-repositorio.git](https://github.com/seu-usuario/nome-do-repositorio.git)
+   git clone [https://github.com/seu-usuario/Fragments-OF-Time.git](https://github.com/seu-usuario/Fragments-OF-Time.git)
