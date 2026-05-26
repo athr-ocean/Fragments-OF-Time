@@ -34,6 +34,4 @@ meu-jogo/
 │   ├── Renderer.js         # Lida com gráficos, partículas, iluminação e desenho (seu código de renderização).
 │   ├── data.js             # Configurações do mapa, variáveis globais (TILE, MAP_CONFIG).
 │   └── ...outros.js        # Outras classes (Player, Audio, etc).
-└── assets/                 # (Opcional) Arquivos estáticos
-    ├── img/                # Imagens (ex: image_c26797.png, image_c267b7.png)
-    └── audio/              # Efeitos sonoros e músicas
+
