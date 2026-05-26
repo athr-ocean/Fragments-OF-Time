@@ -20,18 +20,18 @@ O projeto foi construído de forma nativa (Vanilla), sem o uso de frameworks ou 
 * **JavaScript** - Lógica do jogo, controle de estados, validação das respostas e transição de eras.
 
 
-## 📁 Estrutura de Arquivos e Pastas
+## 📁 Estrutura de Arquivos
 
-Para que o jogo funcione corretamente e o código se mantenha organizado, a estrutura do projeto deve seguir a ordem abaixo:
+O projeto está organizado separando a camada de visualização (raiz) da lógica do jogo (módulos), estruturado da seguinte forma:
 
 ```text
-meu-jogo/
-├── index.html              # Ponto de entrada do jogo. Abre o Canvas no navegador.
-├── css/
-│   └── style.css           # Estilos básicos (ex: reset de margens, centralizar o canvas).
-├── src/                    # Pasta principal contendo toda a lógica do jogo (Scripts)
-│   ├── main.js             # Loop principal do jogo e captura de inputs.
-│   ├── Renderer.js         # Lida com gráficos, partículas, iluminação e desenho (seu código de renderização).
-│   ├── data.js             # Configurações do mapa, variáveis globais (TILE, MAP_CONFIG).
-│   └── ...outros.js        # Outras classes (Player, Audio, etc).
-
+Fragments-OF-Time/
+├── index.html      # Ponto de entrada do jogo (Estrutura da interface e Canvas)
+├── style.css       # Estilos visuais, centralização e animações da UI
+├── main.js         # Script principal de navegação de telas e inicialização do jogo
+└── js/             # Pasta contendo toda a lógica modular e classes do jogo
+    ├── data.js     # Configurações gerais, mapas, textos e banco de perguntas
+    ├── Game.js     # Máquina de estados e loop principal do jogo
+    ├── GameUI.js   # Controle dinâmico da interface HTML sobreposta ao Canvas
+    ├── Player.js   # Lógica de movimentação, colisão e sensores do jogador
+    └── Renderer.js # Motor gráfico (desenho do mapa, iluminação e partículas)
