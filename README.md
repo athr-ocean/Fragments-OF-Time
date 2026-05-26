@@ -18,12 +18,3 @@ O projeto foi construído de forma nativa (Vanilla), sem o uso de frameworks ou 
 * **HTML5** - Estruturação das telas e quizes.
 * **CSS3** - Estilização e interface responsiva.
 * **JavaScript** - Lógica do jogo, controle de estados, validação das respostas e transição de eras.
-
-
-### Execução Local
-
-Caso queira baixar o projeto para a sua máquina:
-
-1. Clone o repositório:
-   ```bash
-   git clone [https://github.com/athr-ocean/Fragments-OF-Time.git](https://github.com/athr-ocean/Fragments-OF-Time.git)
