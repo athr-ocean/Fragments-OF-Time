@@ -23,7 +23,7 @@ O projeto foi construído de forma nativa (Vanilla), sem o uso de frameworks ou 
 
 O jogo pode ser executado diretamente no navegador. 
 
-*(Assim que ativar o GitHub Pages, adicione o link aqui)* 👉 **[Clique aqui para jogar online](https://seu-usuario.github.io/Fragments-OF-Time)**
+*(Assim que ativar o GitHub Pages, adicione o link aqui)* 👉 **[Clique aqui para jogar online](https://athr-ocean.github.io/Fragments-OF-Time)**
 
 ### Execução Local
 
@@ -31,4 +31,4 @@ Caso queira baixar o projeto para a sua máquina:
 
 1. Clone o repositório:
    ```bash
-   git clone [https://github.com/seu-usuario/Fragments-OF-Time.git](https://github.com/seu-usuario/Fragments-OF-Time.git)
+   git clone [https://github.com/athr-ocean/Fragments-OF-Time.git](https://github.com/athr-ocean/Fragments-OF-Time.git)
