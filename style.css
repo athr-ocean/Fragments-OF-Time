@@ -1,0 +1,1397 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+/* Importa a fonte pixel art "Press Start 2P" do Google Fonts —
+   alternativa ao <link> no HTML, válida dentro de arquivos CSS */
+
+:root {
+  /* Paleta de cores inspirada em consoles retrô (GameBoy Advance / CRT) */
+  --gba-dark:     #0d0d1a;             /* Fundo escuro principal */
+  --gba-darker:   #07070f;             /* Fundo ainda mais escuro (bordas internas) */
+  --gba-border:   #e8e8e8;             /* Borda clara (alto contraste) */
+  --gba-border2:  #777799;             /* Borda secundária (tom médio azul-acinzentado) */
+  --gba-text:     #f0f0f0;             /* Cor padrão de texto */
+  --gba-yellow:   #ffde00;             /* Amarelo ouro — destaques, títulos principais */
+  --gba-gold:     #f0a000;             /* Dourado — estrelas decorativas e badges */
+  --gba-green:    #50e878;             /* Verde neon — acerto, vida, progresso */
+  --gba-red:      #ff5050;             /* Vermelho — erro, perigo, game over */
+  --gba-blue:     #60c0ff;             /* Azul claro — informações, época no quiz */
+  --gba-panel:    #12122a;             /* Fundo dos painéis de diálogo */
+  --gba-panel2:   #1a1a36;             /* Fundo alternativo de painéis */
+  --gba-outline:  #3a3a66;             /* Contorno interno dos painéis */
+  --gba-shine:    rgba(255,255,255,0.08); /* Brilho sutil no topo de elementos */
+  --font:         'Press Start 2P', monospace; /* Fonte principal do jogo */
+
+  /* Dimensões do canvas e da área de display */
+  --canvas-w: 480px;                   /* Largura nativa do canvas (proporção do mapa) */
+  --canvas-h: 416px;                   /* Altura nativa do canvas */
+  --display-w: 100vw;                  /* Largura total do viewport */
+  --display-h: calc(100vh - 70px - 34px); /* Altura disponível descontando HUD (50px+borda) e barra de controles (34px) */
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   2. RESET E BASE
+   Remove margens/paddings padrão do navegador e define
+   comportamento base do layout para toda a página.
+   ───────────────────────────────────────────────────────────── */
+
+/* Reset universal: inclui ::before e ::after (pseudoelementos).
+   box-sizing: border-box faz padding e border não aumentarem o tamanho dos elementos */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;          /* Ocupa toda a janela */
+  background: #050510;                /* Cor de fundo da página (preto-azulado) */
+  display: flex;                      /* Flexbox para centralizar conteúdo */
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;                   /* Impede barras de rolagem — o jogo é tela cheia */
+  font-family: var(--font);           /* Fonte pixel art aplicada globalmente */
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   3. TELA DE TÍTULO
+   Primeira tela visível. Cobre tudo com z-index alto,
+   tem fundo em gradiente radial e efeito de scanlines CRT.
+   ───────────────────────────────────────────────────────────── */
+
+#title-screen {
+  position: fixed; inset: 0;          /* Cobre toda a janela (inset: top right bottom left = 0) */
+  background: radial-gradient(         /* Gradiente que simula luz emanando do centro */
+    ellipse at 50% 40%,               /* Foco do gradiente ligeiramente acima do centro */
+    #1a1a40 0%,                       /* Azul-roxo no centro */
+    #04040e 100%                      /* Preto-azulado nas bordas */
+  );
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;                       /* Acima de todas as outras telas */
+  cursor: pointer;                    /* Indica que clicar em qualquer lugar inicia o jogo */
+}
+
+/* Efeito de scanlines (linhas de varredura de TV CRT antiga).
+   Criado com repeating-linear-gradient que desenha faixas
+   transparentes de 3px alternadas com faixas escuras de 1px.
+   A animação scanMove faz essas linhas rolarem para baixo. */
+#title-scanlines {
+  position: absolute; inset: 0;
+  pointer-events: none;               /* Cliques passam através deste elemento */
+  background: repeating-linear-gradient(
+    0deg,                             /* Direção: horizontal (0°) */
+    transparent, transparent 3px,    /* Faixa visível de 3px */
+    rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px  /* Faixa escura de 1px */
+  );
+  animation: scanMove 10s linear infinite; /* Animação contínua de rolagem */
+}
+
+/* Move o background-position para baixo, criando a ilusão
+   das linhas escuras rolando como em uma tela CRT */
+@keyframes scanMove { to { background-position: 0 100px; } }
+
+/* Caixa central da tela de título com bordas duplas e brilho */
+#title-content {
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  padding: 40px 52px;
+  border: 6px solid var(--gba-border2);
+  outline: 3px solid var(--gba-outline); /* outline fica fora da border, criando dupla moldura */
+  outline-offset: 6px;
+  box-shadow:
+    inset 0 0 0 3px var(--gba-darker),       /* Borda interna fina */
+    inset 0 0 60px rgba(80,60,180,0.15),     /* Brilho roxo suave por dentro */
+    0 0 80px rgba(60,40,160,0.4);            /* Sombra externa azulada */
+  background: rgba(8, 8, 24, 0.85);
+  width: 96vw; max-width: none;
+  min-height: 88vh;
+  justify-content: center; gap: 36px;
+  padding: 52px 72px;
+  position: relative;
+}
+
+/* Estrelas decorativas nos cantos da caixa usando pseudoelementos.
+   ::before → canto superior esquerdo | ::after → canto inferior direito */
+#title-content::before, #title-content::after {
+  content: '★';                        /* Conteúdo inserido via CSS puro */
+  position: absolute; font-size: 12px; color: var(--gba-gold);
+}
+#title-content::before { top: 8px; left: 12px; }
+#title-content::after  { bottom: 8px; right: 12px; }
+
+/* Logo principal: filter drop-shadow gera brilho amarelo ao redor do texto */
+#title-logo { line-height: 1; filter: drop-shadow(0 0 16px #ffde0088); }
+
+/* Primeira parte do logo: "FRAGMENTS OF" em amarelo */
+.logo-chrono {
+  font-size: 57px; color: var(--gba-yellow);
+  text-shadow:
+    4px 4px 0 #7a5a00,   /* Sombra dourada — efeito de profundidade */
+    7px 7px 0 #000;      /* Sombra preta mais distante — cria tridimensionalidade */
+  letter-spacing: 5px;
+}
+
+/* Segunda parte do logo: "TIME" em verde */
+.logo-byte {
+  font-size: 57px; color: var(--gba-green);
+  text-shadow: 4px 4px 0 #005520, 7px 7px 0 #000;
+  letter-spacing: 5px;
+}
+
+/* Subtítulo abaixo do logo */
+#title-sub {
+  font-size: 16px; color: var(--gba-blue);
+  letter-spacing: 4px; text-shadow: 1px 1px 0 #000;
+}
+
+/* Caixa com o texto narrativo de introdução */
+#title-intro-text {
+  font-size: 13px; color: #c8c8e0; line-height: 2.4;
+  letter-spacing: 1px; text-shadow: 1px 1px 0 #000;
+  border: 2px solid var(--gba-outline);
+  padding: 14px 24px; background: rgba(255,255,255,0.02);
+}
+
+/* Texto "PRESSIONE ENTER" com animação de piscar.
+   step-end faz a transição ser abrupta (ligado/desligado), não suave —
+   comportamento característico dos jogos retrô */
+#title-press-start {
+  font-size: 13px; color: var(--gba-yellow); letter-spacing: 2px;
+  animation: blink 0.85s step-end infinite;
+  text-shadow: 0 0 12px var(--gba-yellow); /* Brilho ao redor do texto */
+}
+
+/* Rodapé da tela de título em cor discreta */
+#title-footer { font-size: 10px; color: #44445a; letter-spacing: 1px; }
+
+
+/* ─────────────────────────────────────────────────────────────
+   4. TELA DE SELEÇÃO DE DIFICULDADE
+   ───────────────────────────────────────────────────────────── */
+
+#difficulty-screen {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 95;       /* Ligeiramente abaixo da tela de título (z-index: 100) */
+  background: #000;
+}
+
+/* Fundo com gradiente radial da tela de dificuldade */
+#diff-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 35%, #0d0d2a 0%, #040409 100%);
+}
+
+/* Scanlines no fundo de dificuldade, gerado via ::after do #diff-bg */
+#diff-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px
+  );
+  pointer-events: none;
+}
+
+/* Container principal do conteúdo (sobre o fundo) */
+#diff-content {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 32px;
+  padding: 44px 52px 36px;
+  width: 90vw; max-width: 960px;
+  border: 5px solid var(--gba-border2);
+  outline: 3px solid var(--gba-outline);
+  outline-offset: 5px;
+  background: rgba(8, 8, 22, 0.92);
+  box-shadow:
+    inset 0 0 0 3px var(--gba-darker),
+    inset 0 0 50px rgba(70,50,160,0.12),
+    0 0 80px rgba(50,30,140,0.4);
+}
+
+/* Estrelas nos cantos da caixa de conteúdo (mesmo padrão do título) */
+#diff-content::before { content: '★'; position: absolute; top: 10px; left: 14px; font-size: 11px; color: var(--gba-gold); }
+#diff-content::after  { content: '★'; position: absolute; bottom: 10px; right: 14px; font-size: 11px; color: var(--gba-gold); }
+
+/* Cabeçalho da tela: ícone + título + subtítulo */
+#diff-header {
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+
+#diff-title-icon { font-size: 36px; filter: drop-shadow(0 0 10px rgba(255,200,0,0.5)); }
+
+#diff-title {
+  font-size: 21px; color: var(--gba-yellow);
+  text-shadow: 3px 3px 0 #7a5a00, 5px 5px 0 #000;
+  letter-spacing: 3px;
+}
+
+#diff-subtitle {
+  font-size: 12px; color: var(--gba-border2);
+  letter-spacing: 2px; text-shadow: 1px 1px 0 #000;
+}
+
+/* Grade horizontal com os 3 cards de dificuldade */
+#diff-cards {
+  display: flex; gap: 20px; align-items: stretch;
+  width: 100%;
+}
+
+/* ── Estilo base de cada card de dificuldade ── */
+.diff-card {
+  flex: 1;                           /* Divide o espaço igualmente entre os 3 cards */
+  position: relative; overflow: hidden;
+  font-family: var(--font);
+  background: linear-gradient(180deg, #10102a 0%, #0c0c20 100%);
+  border: 3px solid var(--gba-outline);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06), /* Linha de brilho no topo do card */
+    0 4px 16px rgba(0,0,0,0.6);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s; /* Transição suave ao hover */
+  outline: none;                     /* Remove o outline padrão do <button> */
+}
+
+/* Hover: levanta o card 4px para indicar interatividade */
+.diff-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Card em destaque (MÉDIO/RECOMENDADO): borda e brilho amarelos por padrão */
+.diff-card-featured {
+  border-color: var(--gba-yellow);
+  box-shadow:
+    inset 0 1px 0 rgba(255,220,0,0.08),
+    0 0 24px rgba(255,220,0,0.2),    /* Halo amarelo externo */
+    0 4px 20px rgba(0,0,0,0.7);
+}
+
+/* Estado selecionado (pelo teclado): levanta e escala o card */
+.diff-card-selected {
+  transform: translateY(-6px) scale(1.03);
+}
+
+/* Cada dificuldade tem cor de borda e halo diferente quando selecionada */
+.diff-card-selected[data-difficulty="easy"] {
+  border-color: #50e878;                                              /* Verde */
+  box-shadow: 0 0 28px rgba(80,232,120,0.35), 0 6px 20px rgba(0,0,0,0.7);
+}
+.diff-card-selected[data-difficulty="medium"] {
+  border-color: var(--gba-yellow);                                    /* Amarelo */
+  box-shadow: 0 0 28px rgba(255,220,0,0.4), 0 6px 20px rgba(0,0,0,0.7);
+}
+.diff-card-selected[data-difficulty="hard"] {
+  border-color: #ff5050;                                              /* Vermelho */
+  box-shadow: 0 0 28px rgba(255,80,80,0.4), 0 6px 20px rgba(0,0,0,0.7);
+}
+
+/* Animação de confirmação: pulsa brevemente quando o jogador confirma a escolha */
+.diff-card-confirmed {
+  animation: diffConfirm 0.35s ease-out forwards;
+}
+@keyframes diffConfirm {
+  0%   { transform: scale(1.03); }
+  40%  { transform: scale(1.12); filter: brightness(1.4); } /* Pico: maior e mais brilhante */
+  100% { transform: scale(1.0);  filter: brightness(1.0); } /* Retorna ao normal */
+}
+
+/* Camada de brilho colorido no topo de cada card (efeito "glow" interno).
+   Começa quase invisível (opacity: 0.06) e fica mais visível no hover */
+.diff-card-glow {
+  position: absolute; inset: 0; pointer-events: none;
+  opacity: 0.06; transition: opacity 0.2s;
+}
+
+/* Gradiente radial de cada glow com a cor temática da dificuldade */
+.diff-glow-easy   { background: radial-gradient(ellipse at 50% 0%, #50e878 0%, transparent 70%); }
+.diff-glow-medium { background: radial-gradient(ellipse at 50% 0%, #ffde00 0%, transparent 70%); }
+.diff-glow-hard   { background: radial-gradient(ellipse at 50% 0%, #ff5050 0%, transparent 70%); }
+
+/* Aumenta a opacidade do glow no hover/selecionado */
+.diff-card:hover .diff-card-glow,
+.diff-card-selected .diff-card-glow { opacity: 0.18; }
+.diff-card-featured .diff-card-glow { opacity: 0.12; }
+
+/* Selo "RECOMENDADO" centralizado no topo do card Médio */
+.diff-featured-badge {
+  position: absolute; top: 0;
+  left: 50%; transform: translateX(-50%); /* Centraliza horizontalmente */
+  font-size: 10px; color: #0a0a18;
+  background: linear-gradient(90deg, #e8c000, #ffe830); /* Gradiente dourado */
+  padding: 3px 10px;
+  letter-spacing: 1.5px; white-space: nowrap;
+  z-index: 2; /* Fica acima do glow */
+}
+
+/* Conteúdo interno de cada card (empilhado verticalmente e centralizado) */
+.diff-card-inner {
+  position: relative; z-index: 1;  /* Acima do glow layer */
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 22px 18px 20px;
+}
+
+.diff-card-icon { font-size: 39px; margin-bottom: 2px; }
+
+/* Nome da dificuldade com sombra de texto para profundidade */
+.diff-card-name {
+  font-size: 17px; letter-spacing: 3px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+/* Cores específicas do nome + brilho neon para cada dificuldade */
+.diff-name-easy   { color: #50e878; text-shadow: 2px 2px 0 #003300, 0 0 12px rgba(80,232,120,0.4); }
+.diff-name-medium { color: var(--gba-yellow); text-shadow: 2px 2px 0 #6a4a00, 0 0 12px rgba(255,220,0,0.35); }
+.diff-name-hard   { color: #ff5050; text-shadow: 2px 2px 0 #5a0000, 0 0 12px rgba(255,80,80,0.4); }
+
+/* Linha divisória horizontal entre nome e estatísticas do card */
+.diff-card-divider {
+  width: 80%; height: 2px;
+  /* Gradiente que desaparece nas pontas, criando linha suave */
+  background: linear-gradient(90deg, transparent, var(--gba-outline), transparent);
+  margin: 2px 0;
+}
+
+/* Linha de estatística: label à esquerda e valor à direita */
+.diff-stat-row {
+  display: flex; justify-content: space-between; align-items: center;
+  width: 100%; gap: 8px;
+}
+
+.diff-stat-label {
+  font-size: 11px; color: var(--gba-border2);
+  letter-spacing: 0.5px; text-shadow: 1px 1px 0 #000;
+}
+
+/* Valor da estatística — cor padrão (sobrescrita pelas variantes abaixo) */
+.diff-stat-val {
+  font-size: 12px; color: var(--gba-text);
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Valores de vida coloridos por dificuldade */
+.diff-val-easy   { color: #50e878; }           /* Verde */
+.diff-val-medium { color: var(--gba-yellow); } /* Amarelo */
+.diff-val-hard   { color: #ff5050; }           /* Vermelho */
+
+/* Descrição textual no rodapé do card */
+.diff-card-desc {
+  font-size: 10px; color: #8888aa;
+  line-height: 2; text-align: center; letter-spacing: 0.5px;
+  text-shadow: 1px 1px 0 #000;
+  border-top: 1px solid var(--gba-outline); /* Linha separadora acima */
+  padding-top: 8px; margin-top: 2px;
+  width: 100%;
+}
+
+/* Dica de navegação por teclado abaixo dos cards */
+#diff-hint {
+  font-size: 11px; color: rgba(120,120,180,0.55);
+  letter-spacing: 1.5px; text-shadow: 1px 1px 0 #000;
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   5. CUTSCENE DE INTRODUÇÃO
+   Tela de diálogo estilo RPG com cena e caixa de fala.
+   ───────────────────────────────────────────────────────────── */
+
+#cutscene-screen {
+  position: fixed; inset: 0; background: #000;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 90; /* Abaixo da seleção de dificuldade (95) e do título (100) */
+}
+
+/* Fundo degradê simples da cutscene */
+#cutscene-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, #0a0a20 0%, #050510 100%);
+}
+
+/* Painel central que agrupa cena + caixa de diálogo */
+#cutscene-panel {
+  position: relative; width: 660px;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+}
+
+/* Área de cena: espaço onde ilustrações/animações da história são exibidas.
+   O overflow: hidden garante que elementos que saem da área fiquem cortados */
+#cutscene-scene {
+  width: 660px; height: 200px;
+  background: linear-gradient(180deg, #0a1020 0%, #050810 100%);
+  border-bottom: 2px solid var(--gba-outline);
+  position: relative; overflow: hidden;
+}
+
+/* Estrelas decorativas no céu da cena, inseridas via CSS puro */
+#cutscene-scene::before {
+  content: '✦ · ✧ · ✦ · · ✧ · ✦ · ✧ ·';
+  position: absolute; top: 20px; left: 0; right: 0;
+  text-align: center; font-size: 8px; color: rgba(200,200,255,0.3);
+  letter-spacing: 20px;
+}
+
+/* Caixa de diálogo (parte inferior da cutscene):
+   borda tripla (border + dois insets) simulando painel de videogame */
+#cutscene-dialog-box {
+  width: 660px;
+  background: var(--gba-panel);
+  border: 5px solid var(--gba-border);
+  box-shadow:
+    inset 0 0 0 3px var(--gba-darker),   /* Borda interna escura */
+    inset 0 0 0 5px var(--gba-outline),  /* Segunda borda interna */
+    0 4px 20px rgba(0,0,0,0.8);
+  display: flex; padding: 14px 16px; gap: 14px;
+  min-height: 120px; position: relative;
+}
+
+/* Linha decorativa fina no topo interior da caixa de diálogo */
+#cutscene-dialog-box::before {
+  content: '';
+  position: absolute; top: 8px; left: 8px; right: 8px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gba-outline), transparent);
+}
+
+/* Coluna esquerda: retrato + nome do personagem */
+#cutscene-portrait-wrap {
+  flex-shrink: 0; /* Não encolhe quando o texto cresce */
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+
+/* Quadrado do retrato pixel art (80×80px) */
+#cutscene-portrait {
+  width: 80px; height: 80px;
+  border: 3px solid var(--gba-border);
+  box-shadow: inset 0 0 0 2px var(--gba-outline), 0 0 10px rgba(100,100,255,0.3);
+  background: #070718;
+  image-rendering: pixelated; /* Mantém pixel art nítida sem suavização */
+}
+
+/* Nome do personagem falante (abaixo do retrato) */
+#cutscene-portrait-name {
+  font-size: 11px; color: var(--gba-yellow);
+  text-align: center; letter-spacing: 0.5px;
+  text-shadow: 1px 1px 0 #000;
+  background: var(--gba-darker);
+  border: 1px solid var(--gba-outline);
+  padding: 2px 6px;
+  max-width: 82px;
+}
+
+/* Área de texto da cutscene (ocupa o espaço restante ao lado do retrato) */
+#cutscene-text-area { flex: 1; padding: 6px 4px 0; }
+
+/* Parágrafo de texto do diálogo */
+#cutscene-text {
+  font-size: 13px; color: var(--gba-text);
+  line-height: 2; letter-spacing: 0.5px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Seta piscante no canto inferior direito, indicando "há mais diálogo".
+   Inicialmente display: none — o JS a exibe quando há próxima fala */
+#cutscene-arrow {
+  position: absolute; bottom: 10px; right: 14px;
+  font-size: 12px; color: var(--gba-yellow);
+  text-shadow: 0 0 6px var(--gba-yellow);
+  animation: blink 0.7s step-end infinite;
+  display: none;
+}
+
+/* Instrução de avanço de diálogo abaixo da caixa */
+#cutscene-hint {
+  font-size: 11px; color: rgba(140,140,180,0.6);
+  padding: 7px 0; letter-spacing: 1.5px;
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   6. JOGO PRINCIPAL
+   Layout em coluna: HUD (topo) + Canvas (centro) + Controles (base)
+   ───────────────────────────────────────────────────────────── */
+
+/* Wrapper principal: coluna flex ocupando toda a tela */
+#game-wrapper {
+  position: fixed; inset: 0; overflow: hidden;
+  background: #000;
+  display: flex; flex-direction: column; /* Empilha HUD, canvas e barra de controles */
+}
+
+/* ── HUD (Barra de Status Superior) ── */
+#era-banner {
+  flex-shrink: 0; height: 50px;      /* Altura fixa — não encolhe com o flex */
+  background: linear-gradient(90deg, #080818 0%, #0f0f28 50%, #080818 100%);
+  border-bottom: 3px solid var(--gba-border2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  display: flex; align-items: center; padding: 0 12px; gap: 10px;
+}
+
+/* Ícone da era histórica atual (emoji ou sprite) */
+#era-icon { font-size: 23px; filter: drop-shadow(0 0 4px rgba(255,255,255,0.4)); }
+
+/* Bloco de informações da era (ocupa todo o espaço restante entre ícone e HUD-right) */
+#era-info { flex: 1; }
+
+/* Nome da era/fase atual (ex: "ANOS 40 — ENIAC") */
+#era-name {
+  font-size: 14px; color: var(--gba-yellow);
+  text-shadow: 1px 1px 0 #000, 0 0 8px rgba(255,220,0,0.4);
+  letter-spacing: 1px;
+}
+
+/* Ano da era exibido abaixo do nome */
+#era-year {
+  font-size: 11px; color: var(--gba-border2); letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* Grupo de indicadores à direita do HUD (dificuldade, vidas, score, progresso) */
+#hud-right {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: nowrap;
+}
+
+/* Estilo base de cada span de status no HUD */
+#hud-right span {
+  font-size: 13px; color: var(--gba-text);
+  text-shadow: 1px 1px 0 #000; letter-spacing: 0.5px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--gba-outline);
+  padding: 3px 8px;
+}
+
+/* Badge de dificuldade: cor muda dinamicamente via JS */
+#hud-diff-badge {
+  font-size: 11px !important;
+  letter-spacing: 1px !important;
+  padding: 4px 8px !important;
+  border: 2px solid var(--gba-outline) !important;
+  background: rgba(0,0,0,0.5) !important;
+  white-space: nowrap;
+  transition: color 0.3s, border-color 0.3s, box-shadow 0.3s; /* Transição suave de cor */
+}
+
+/* Container das vidas com ícones de coração */
+#hud-lives {
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  background: rgba(0,0,0,0.4) !important;
+  border: 1px solid var(--gba-outline) !important;
+  padding: 4px 8px !important;
+  font-size: 18px !important;
+}
+
+/* Cada coração individual */
+.heart {
+  display: inline-block;
+  transition: transform 0.15s, opacity 0.15s; /* Anima quando uma vida é perdida */
+  line-height: 1;
+}
+
+/* Coração cheio (vida disponível): vermelho com brilho e pulsação */
+.heart-full {
+  color: #ff5050;
+  filter: drop-shadow(0 0 4px rgba(255,80,80,0.7));
+  animation: heartbeat 1.8s ease-in-out infinite;
+}
+
+/* Coração vazio (vida perdida): cinza escuro sem brilho */
+.heart-empty {
+  color: #444466;
+  filter: none;
+  opacity: 0.5;
+}
+
+/* Animação de batimento cardíaco nos corações cheios:
+   dois pulsos pequenos por ciclo, imitando ritmo cardíaco */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  15%       { transform: scale(1.2); }  /* Primeiro batimento */
+  30%       { transform: scale(1); }
+  45%       { transform: scale(1.1); } /* Segundo batimento (menor) */
+  60%       { transform: scale(1); }
+}
+
+/* ── Canvas do Jogo ── */
+#gameCanvas {
+  display: block;
+  height: 100%;                      /* Preenche a altura disponível */
+  width: auto;                       /* Largura ajusta proporcionalmente */
+  aspect-ratio: 480 / 416;           /* Mantém proporção original do mapa */
+  max-width: 100%;                   /* Não ultrapassa a largura da tela */
+
+  /* image-rendering: pixelated preserva a pixel art nítida ao escalar.
+     As 3 propriedades cobrem diferentes navegadores (Chrome, Firefox, Safari) */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  image-rendering: -moz-crisp-edges;
+
+  align-self: center;                /* Centraliza no eixo horizontal */
+  margin: 0 auto;
+}
+
+/* ── Barra de Controles (Rodapé) ── */
+#controls-bar {
+  flex-shrink: 0; height: 34px;      /* Altura fixa */
+  background: linear-gradient(90deg, #050510 0%, #0a0a20 50%, #050510 100%);
+  border-top: 2px solid #18183a;
+  display: flex; align-items: center; justify-content: center; gap: 36px;
+}
+#controls-bar span {
+  font-size: 11px; color: rgba(160,160,200,0.6); letter-spacing: 1.5px;
+}
+
+/* ── Container dos Painéis de UI ──
+   Sobreposição transparente que cobre o canvas.
+   pointer-events: none → cliques passam para o canvas quando hidden.
+   :not(.hidden) → ativa cliques quando algum painel está visível */
+#ui-container {
+  position: absolute;
+  top: 50px; left: 0;               /* Começa abaixo do HUD */
+  width: 100%;
+  height: calc(100% - 50px - 34px); /* Descontando HUD e barra de controles */
+  pointer-events: none; z-index: 10;
+}
+#ui-container:not(.hidden) { pointer-events: all; }
+
+
+/* ─────────────────────────────────────────────────────────────
+   7. PAINEL DE DIÁLOGO (in-game)
+   Aparece na parte inferior do canvas ao interagir com NPCs.
+   ───────────────────────────────────────────────────────────── */
+
+#dialog-box {
+  position: absolute; bottom: 0; left: 0; width: 100%;
+  background: linear-gradient(180deg, #14142e 0%, #0e0e22 100%);
+  border-top: 5px solid var(--gba-border);
+  box-shadow:
+    inset 0 3px 0 var(--gba-darker),
+    inset 0 6px 0 var(--gba-outline),
+    inset 0 8px 0 rgba(255,255,255,0.05), /* Fina linha de brilho logo abaixo da borda */
+    0 -4px 24px rgba(0,0,0,0.9);          /* Sombra projetada para cima (no canvas) */
+  display: flex; align-items: flex-start;
+  padding: 14px 18px 16px;
+  gap: 16px;
+  min-height: 130px;
+}
+
+/* Linha de brilho horizontal no topo do painel (reflete a "borda superior" da caixa) */
+#dialog-box::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.3) 20%,
+    rgba(255,255,255,0.5) 50%,
+    rgba(255,255,255,0.3) 80%,
+    transparent 100%
+  );
+}
+
+/* Linha decorativa no rodapé interno da caixa */
+#dialog-box::after {
+  content: '';
+  position: absolute; bottom: 8px; left: 8px; right: 8px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gba-outline), transparent);
+}
+
+/* Coluna esquerda: portrait + label do personagem */
+#dialog-left {
+  flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+
+/* Moldura do retrato: quadrado com bordas e brilho interno azulado */
+#dialog-portrait-frame {
+  width: 80px; height: 80px;
+  background: #050510;
+  border: 3px solid var(--gba-border);
+  box-shadow:
+    inset 0 0 0 2px var(--gba-outline),
+    inset 0 0 12px rgba(0,0,200,0.2),    /* Brilho azul dentro do quadro */
+    0 0 8px rgba(100,100,255,0.3);       /* Sombra azulada externa */
+  overflow: hidden;
+  image-rendering: pixelated;
+  position: relative;
+}
+
+/* Reflexo de luz no topo da moldura do retrato (efeito "vidro") */
+#dialog-portrait-frame::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 30%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Canvas onde o JS desenha o pixel art do personagem (64×64 esticado para 80×80 via CSS) */
+#dialog-portrait-canvas {
+  image-rendering: pixelated;
+  width: 80px; height: 80px;
+  display: block;
+}
+
+/* Label com o nome do personagem abaixo do retrato */
+#dialog-portrait-label {
+  font-size: 11px; color: var(--gba-yellow);
+  text-align: center; letter-spacing: 0.5px;
+  text-shadow: 1px 1px 0 #000;
+  background: var(--gba-darker);
+  border: 1px solid var(--gba-outline);
+  padding: 2px 5px;
+  max-width: 84px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* Trunca nomes longos */
+}
+
+/* Coluna direita: nome do falante e texto do diálogo */
+#dialog-right {
+  flex: 1; display: flex; flex-direction: column; gap: 8px;
+  padding-top: 2px;
+}
+
+/* Nome do personagem falante em destaque (amarelo) */
+#dialog-speaker-name {
+  font-size: 11px; color: var(--gba-yellow);
+  letter-spacing: 1.5px;
+  text-shadow: 1px 1px 0 #000, 0 0 10px rgba(255,220,0,0.35);
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--gba-outline);
+}
+
+/* Texto do diálogo — preenchido e animado (efeito typewriter) via JS */
+#dialog-text {
+  font-size: 13px; color: var(--gba-text);
+  line-height: 2; letter-spacing: 0.5px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Seta piscante de "continuar" (mesmo padrão da cutscene).
+   display: none por padrão — JS exibe quando há mais texto */
+#dialog-arrow-indicator {
+  position: absolute; bottom: 12px; right: 18px;
+  font-size: 13px; color: var(--gba-yellow);
+  text-shadow: 0 0 8px var(--gba-yellow);
+  animation: blink 0.7s step-end infinite;
+  display: none;
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   8. PAINEL DE QUIZ
+   Aparece na parte inferior ao iniciar uma pergunta.
+   Inclui cabeçalho (era + máquina + timer), pergunta e opções.
+   ───────────────────────────────────────────────────────────── */
+
+#quiz-panel {
+  position: absolute; bottom: 0; left: 0; width: 100%;
+  background: linear-gradient(180deg, #0e0e28 0%, #0a0a1e 100%);
+  border-top: 5px solid var(--gba-border);
+  box-shadow:
+    inset 0 3px 0 var(--gba-darker),
+    inset 0 6px 0 var(--gba-outline),
+    0 -4px 24px rgba(0,0,0,0.9);
+  padding: 14px 18px 16px;
+}
+
+/* Linha de brilho no topo (mesmo padrão do dialog-box) */
+#quiz-panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4) 50%, transparent);
+}
+
+/* Cabeçalho do quiz: era, máquina e timer lado a lado */
+#quiz-header {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 6px;
+  padding-bottom: 9px;
+  border-bottom: 2px solid var(--gba-outline);
+  margin-bottom: 11px;
+}
+
+/* Label da época histórica (ex: "ANOS 40") — fundo azul translúcido */
+#quiz-epoch-label {
+  font-size: 12px; color: var(--gba-blue);
+  letter-spacing: 1px; text-shadow: 1px 1px 0 #000;
+  background: rgba(0,100,200,0.15);
+  border: 1px solid rgba(0,150,255,0.3);
+  padding: 2px 7px;
+}
+
+/* Label do nome da máquina histórica (ex: "ENIAC") */
+#quiz-machine-label {
+  font-size: 12px; color: var(--gba-yellow);
+  letter-spacing: 0.5px; text-shadow: 1px 1px 0 #000;
+}
+
+/* Wrapper do timer (barra + contagem numérica) */
+#quiz-timer-wrap {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--gba-outline);
+  padding: 3px 8px;
+  min-width: 120px;
+  position: relative;
+}
+
+/* Ícone de relógio antes da barra, inserido via CSS */
+#quiz-timer-wrap::before {
+  content: '⏱';
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Barra de timer: propriedades base */
+.timer-fill {
+  flex: 1;
+  height: 8px;
+  border-radius: 0;
+  /* width é alterada pelo JS a cada segundo para encolher a barra */
+  transition: width 0.25s linear, background 0.4s;
+  position: relative;
+}
+
+/* Estados de cor do timer baseados no tempo restante:
+   ok → verde (tempo confortável)
+   warn → amarelo (atenção)
+   danger → vermelho pulsante (urgência) */
+.timer-ok     { background: #22aa44; box-shadow: 0 0 6px rgba(34,170,68,0.6); }
+.timer-warn   { background: #ccaa00; box-shadow: 0 0 6px rgba(204,170,0,0.6); }
+.timer-danger {
+  background: #cc2222;
+  box-shadow: 0 0 8px rgba(204,34,34,0.8);
+  animation: timerPulse 0.4s ease-in-out infinite alternate; /* Pulsação rápida de urgência */
+}
+
+/* Animação de pulsação da sombra do timer em perigo */
+@keyframes timerPulse {
+  from { box-shadow: 0 0 6px rgba(204,34,34,0.6); }
+  to   { box-shadow: 0 0 14px rgba(255,60,60,1); }   /* Brilho máximo */
+}
+
+/* Contagem numérica dos segundos restantes */
+#quiz-timer-count {
+  font-size: 12px; color: var(--gba-text);
+  min-width: 28px; text-align: right;
+  text-shadow: 1px 1px 0 #000;
+  flex-shrink: 0;
+}
+
+/* Limita a largura máxima da barra de timer dentro do container */
+#quiz-timer-wrap > .timer-fill {
+  height: 8px;
+  min-width: 4px;
+  max-width: 80px;
+}
+
+/* Área da pergunta com altura mínima para não pular o layout */
+#quiz-question-wrap { min-height: 46px; margin-bottom: 11px; }
+
+#quiz-question {
+  font-size: 13px; color: var(--gba-text);
+  line-height: 2; letter-spacing: 0.5px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Grade 2×2 para os 4 botões de resposta (A, B, C, D) */
+#quiz-options-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+
+/* Estilo dos botões de alternativa */
+#quiz-options-grid button {
+  font-family: var(--font);
+  font-size: 12px; color: var(--gba-text);
+  background: linear-gradient(180deg, #1e1e3a 0%, #16162e 100%);
+  border: 2px solid var(--gba-outline);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),  /* Brilho sutil no topo */
+    inset 0 -1px 0 rgba(0,0,0,0.5);        /* Sombra sutil na base */
+  padding: 10px 10px 10px 22px;           /* Espaço à esquerda para a seta ▶ */
+  cursor: pointer; text-align: left;
+  line-height: 1.7; letter-spacing: 0.3px;
+  transition: background 0.08s, border-color 0.08s, color 0.08s, box-shadow 0.08s;
+  position: relative;
+}
+
+/* Seta ▶ no lado esquerdo do botão (invisível por padrão, aparece no hover) */
+#quiz-options-grid button::before {
+  content: '▶';
+  position: absolute; left: 7px; top: 50%; transform: translateY(-50%);
+  color: transparent; font-size: 12px; transition: color 0.08s;
+}
+
+/* Letra da alternativa (A, B, C ou D) no lado direito.
+   attr(data-letter) lê o atributo data-letter do botão definido pelo JS */
+#quiz-options-grid button::after {
+  content: attr(data-letter);
+  position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+  font-size: 11px; color: var(--gba-outline);
+  transition: color 0.08s;
+}
+
+/* Hover/Focus: destaca o botão com borda e cor amarela */
+#quiz-options-grid button:hover,
+#quiz-options-grid button:focus {
+  background: linear-gradient(180deg, #28284a 0%, #1e1e40 100%);
+  border-color: var(--gba-yellow);
+  color: var(--gba-yellow);
+  outline: none;                         /* Remove outline padrão do foco */
+  box-shadow:
+    inset 0 1px 0 rgba(255,220,0,0.15),
+    0 0 8px rgba(255,220,0,0.2);
+}
+
+/* Seta e letra ficam amarelas no hover */
+#quiz-options-grid button:hover::before,
+#quiz-options-grid button:focus::before { color: var(--gba-yellow); }
+#quiz-options-grid button:hover::after,
+#quiz-options-grid button:focus::after  { color: var(--gba-yellow); }
+
+/* Desabilitado (após responder): opaco e cursor bloqueado */
+#quiz-options-grid button:disabled {
+  opacity: 0.55; cursor: not-allowed;
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   9. PAINEL DE FEEDBACK
+   Exibido após o jogador responder: mostra resultado,
+   curiosidade histórica e barra de progresso de reparo.
+   ───────────────────────────────────────────────────────────── */
+
+#feedback-panel {
+  position: absolute; bottom: 0; left: 0; width: 100%;
+  background: linear-gradient(180deg, #0e0e28 0%, #0a0a1e 100%);
+  border-top: 5px solid var(--gba-border);
+  box-shadow:
+    inset 0 3px 0 var(--gba-darker),
+    inset 0 6px 0 var(--gba-outline),
+    0 -4px 24px rgba(0,0,0,0.9);
+  padding: 13px 18px 15px;
+}
+
+/* Linha de brilho no topo (padrão compartilhado entre painéis) */
+#feedback-panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4) 50%, transparent);
+}
+
+/* Cabeçalho do feedback: ícone + título ("CORRETO!" ou "ERRADO!") */
+#feedback-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 9px; padding-bottom: 9px;
+  border-bottom: 2px solid var(--gba-outline);
+}
+
+#feedback-icon { font-size: 26px; }
+
+/* Título do feedback — cor varia pela classe JS adicionada */
+#feedback-title {
+  font-size: 18px; letter-spacing: 2px;
+  text-shadow: 2px 2px 0 #000;
+}
+/* Classe adicionada pelo JS quando a resposta é correta */
+#feedback-title.correct {
+  color: var(--gba-green);
+  text-shadow: 2px 2px 0 #003300, 0 0 15px rgba(80,232,120,0.5);
+}
+/* Classe adicionada pelo JS quando a resposta é errada */
+#feedback-title.wrong {
+  color: var(--gba-red);
+  text-shadow: 2px 2px 0 #330000, 0 0 15px rgba(255,80,80,0.5);
+}
+/* Classe adicionada pelo JS quando o tempo esgota */
+#feedback-title.timeout {
+  color: var(--gba-yellow);
+  text-shadow: 2px 2px 0 #5a3a00, 0 0 15px rgba(255,220,0,0.5);
+  animation: blink 0.5s step-end 3; /* Pisca 3 vezes e para (não é infinite) */
+}
+
+/* Área da curiosidade histórica — fundo escuro semi-transparente */
+#feedback-curiosity-wrap {
+  min-height: 42px; margin-bottom: 11px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--gba-outline);
+  padding: 8px 10px;
+}
+
+/* Texto da curiosidade em azul claro */
+#feedback-curiosity {
+  font-size: 12px; color: #aad8ff;
+  line-height: 2; letter-spacing: 0.4px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Rodapé do feedback: barra de reparo à esquerda + botão Continuar à direita */
+#feedback-footer {
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* Container da barra de progresso de reparo */
+#feedback-repair-bar {
+  display: flex; align-items: center; gap: 9px;
+}
+
+#feedback-repair-label {
+  font-size: 11px; color: var(--gba-border2);
+  letter-spacing: 0.5px; white-space: nowrap;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Trilha/pista da barra de progresso (fundo escuro) */
+#repair-bar-track {
+  width: 160px; height: 14px;
+  background: #0a0a1a;
+  border: 2px solid var(--gba-border2);
+  box-shadow: inset 0 0 0 1px #000;
+  overflow: hidden; position: relative;
+}
+
+/* Ranhuras decorativas sobre a trilha (efeito de textura) */
+#repair-bar-track::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    90deg, transparent, transparent 30px,
+    rgba(0,0,0,0.3) 30px, rgba(0,0,0,0.3) 32px /* Linhas verticais a cada 30px */
+  );
+  pointer-events: none;
+}
+
+/* Preenchimento verde da barra — largura animada pelo JS de 0% a 100%.
+   cubic-bezier cria aceleração suave (ease-in-out) na transição */
+#repair-bar-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #22aa44, #50e878);
+  box-shadow: 0 0 8px rgba(80,232,120,0.6);
+  transition: width 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Porcentagem numérica à direita da barra */
+#repair-percent {
+  font-size: 12px; color: var(--gba-green);
+  text-shadow: 1px 1px 0 #000, 0 0 6px rgba(80,232,120,0.5);
+  min-width: 36px;
+}
+
+/* Botão "CONTINUAR ▶" — estilo dourado com gradiente e brilho */
+#feedback-continue-btn {
+  font-family: var(--font);
+  font-size: 12px; color: #0a0a18;
+  background: linear-gradient(180deg, #ffe830 0%, #e8c000 100%);
+  border: 3px solid var(--gba-border2);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.4),  /* Reflexo no topo */
+    inset 0 -2px 0 rgba(0,0,0,0.3),       /* Sombra na base */
+    0 0 10px rgba(255,220,0,0.3);
+  padding: 9px 18px;
+  cursor: pointer; letter-spacing: 1px;
+  transition: all 0.1s;
+}
+#feedback-continue-btn:hover {
+  background: linear-gradient(180deg, #fff 0%, #ffec50 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 0 16px rgba(255,220,0,0.5);
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   10. TELA DE GAME OVER
+   Exibida quando o jogador perde todas as vidas.
+   Tema vermelho com animação de flicker (tela instável).
+   ───────────────────────────────────────────────────────────── */
+
+#gameover-screen {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 300; /* Acima de tudo — aparece sobre o jogo em curso */
+}
+
+/* Fundo com gradiente vermelho escuro + animação de flicker (tela instável) */
+#gameover-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, #1a0505 0%, #040008 100%);
+  animation: goFlicker 5s linear infinite;
+}
+
+/* Simula instabilidade de tela CRT: quedas rápidas de opacidade em momentos específicos */
+@keyframes goFlicker {
+  0%,100% { opacity: 1; }
+  92%      { opacity: 1; }
+  93%      { opacity: 0.85; } /* Primeiro flicker */
+  94%      { opacity: 1; }
+  97%      { opacity: 1; }
+  98%      { opacity: 0.9; } /* Segundo flicker */
+}
+
+/* Container central do Game Over */
+#gameover-content {
+  position: relative; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  padding: 40px 52px;
+  max-width: 560px; width: 90vw;
+  border: 5px solid #aa2222;      /* Borda vermelha */
+  outline: 3px solid #440000;
+  outline-offset: 4px;
+  background: rgba(10, 2, 2, 0.92);
+  box-shadow:
+    inset 0 0 0 3px #070303,
+    inset 0 0 50px rgba(180,0,0,0.12),  /* Brilho vermelho interno */
+    0 0 80px rgba(200,0,0,0.3);         /* Halo vermelho externo */
+}
+
+/* Emoji de badge balançando (animação de shake) */
+#gameover-badge {
+  font-size: 52px;
+  animation: goShake 0.7s ease-in-out infinite alternate;
+}
+@keyframes goShake {
+  from { transform: rotate(-5deg) scale(1); }
+  to   { transform: rotate(5deg) scale(1.1); }  /* Oscila de lado a lado */
+}
+
+/* Título "GAME OVER" pulsante em vermelho */
+#gameover-title {
+  font-size: 29px; color: #ff5050;
+  text-shadow: 3px 3px 0 #660000, 6px 6px 0 #000;
+  letter-spacing: 4px;
+  animation: pulse 0.9s ease-in-out infinite alternate;
+}
+
+#gameover-sub {
+  font-size: 13px; color: #cc8888;
+  text-shadow: 1px 1px 0 #000; letter-spacing: 1.5px;
+}
+
+/* Badge com o nível de dificuldade — cor definida via JS */
+#gameover-diff-badge {
+  font-size: 13px;
+  border: 2px solid;              /* Cor da borda herdada da cor do texto (via JS) */
+  padding: 5px 14px;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Tabela de estatísticas da partida perdida */
+#gameover-stats {
+  width: 100%; border: 2px solid #440000;
+  padding: 12px 18px; background: rgba(0,0,0,0.4);
+  display: flex; flex-direction: column; gap: 9px;
+}
+
+/* Valores das estatísticas no Game Over em laranja (diferente do ending amarelo) */
+#gameover-stats .stat-row span:last-child { color: #ffaa44; }
+
+/* Caixa de dica/erro explicativo */
+#gameover-tip {
+  font-size: 11px; color: #886666;
+  line-height: 2; letter-spacing: 0.5px;
+  border: 1px solid #330000;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.3);
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Botão de "Tentar Novamente" — tema vermelho */
+#gameover-retry-btn {
+  font-family: var(--font);
+  font-size: 13px; color: #0a0a18;
+  background: linear-gradient(180deg, #ff7070 0%, #cc2222 100%);
+  border: 3px solid #ff5050;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 0 16px rgba(255,80,80,0.4);
+  padding: 12px 24px; cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.12s;
+}
+#gameover-retry-btn:hover {
+  background: linear-gradient(180deg, #ffaaaa 0%, #ee4444 100%);
+  box-shadow: 0 0 24px rgba(255,100,100,0.6);
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   11. TELA FINAL (ENDING)
+   Exibida ao completar o jogo. Tema verde de vitória,
+   animação do troféu girando e estatísticas finais.
+   ───────────────────────────────────────────────────────────── */
+
+#ending-screen {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; background: #000;
+}
+
+/* Fundo verde escuro pulsante (respiração calma de vitória) */
+#ending-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, #0a180a 0%, #030803 100%);
+  animation: endPulse 4s ease-in-out infinite alternate;
+}
+@keyframes endPulse {
+  from { opacity: 0.85; }
+  to   { opacity: 1; }
+}
+
+/* Container central da tela final */
+#ending-content {
+  position: relative; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  padding: 36px 52px;
+  border: 5px solid var(--gba-border2);
+  box-shadow:
+    inset 0 0 0 3px var(--gba-darker),
+    inset 0 0 0 6px var(--gba-outline),
+    0 0 80px rgba(0,80,0,0.4);         /* Halo verde de vitória */
+  background: rgba(4, 8, 4, 0.85);
+  max-width: 640px;
+}
+
+/* Trio de estrelas decorativas no topo do container via ::before */
+#ending-content::before {
+  content: '✦ ✧ ✦';
+  position: absolute; top: 10px;
+  left: 50%; transform: translateX(-50%); /* Centraliza horizontalmente */
+  font-size: 11px; color: var(--gba-gold); letter-spacing: 8px;
+}
+
+/* Canvas da animação do abraço final (pixel art 200×140).
+   image-rendering: pixelated garante nitidez sem blur */
+#abraco-canvas {
+  width: 200px; height: 140px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 3px solid var(--gba-border2);
+  box-shadow:
+    inset 0 0 0 2px var(--gba-outline),
+    0 0 20px rgba(80,200,80,0.3);
+  margin-top: 8px;
+}
+
+/* Troféu 🏆 girando em rotação 3D no eixo Y (efeito "moeda girando") */
+#ending-badge { font-size: 47px; animation: spin 5s linear infinite; }
+@keyframes spin {
+  0%   { transform: rotateY(0deg); }
+  50%  { transform: rotateY(180deg); } /* Metade: visto de lado (largura zero) */
+  100% { transform: rotateY(360deg); }
+}
+
+/* Título "MISSÃO COMPLETA!" com pulso suave */
+#ending-title {
+  font-size: 23px; color: var(--gba-yellow);
+  text-shadow: 3px 3px 0 #7a5a00, 6px 6px 0 #000;
+  animation: pulse 1.3s ease-in-out infinite alternate;
+}
+
+#ending-sub {
+  font-size: 13px; color: var(--gba-green);
+  text-shadow: 1px 1px 0 #003300; letter-spacing: 1px;
+}
+
+/* Divisória ornamental (linha que desaparece nas pontas) */
+#ending-divider {
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gba-border2), transparent);
+}
+
+/* Texto narrativo de encerramento da história */
+#ending-flavor {
+  font-size: 12px; color: #b0b8d0; line-height: 2.2;
+  letter-spacing: 0.5px; text-shadow: 1px 1px 0 #000;
+  border: 1px solid var(--gba-outline);
+  padding: 10px 14px; background: rgba(0,0,0,0.3);
+}
+
+/* Tabela de estatísticas finais */
+#ending-stats {
+  width: 100%; border: 2px solid var(--gba-outline);
+  padding: 12px 18px; background: rgba(0,0,0,0.3);
+  display: flex; flex-direction: column; gap: 9px;
+}
+
+/* Cada linha da tabela: rótulo à esquerda, valor à direita */
+.stat-row {
+  display: flex; justify-content: space-between;
+  font-size: 13px; color: var(--gba-text);
+  text-shadow: 1px 1px 0 #000; letter-spacing: 1px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--gba-outline);
+}
+.stat-row:last-child { border-bottom: none; padding-bottom: 0; } /* Remove borda da última linha */
+.stat-row span:last-child { color: var(--gba-yellow); }           /* Valores em amarelo */
+
+/* Botão "JOGAR NOVAMENTE" — mesmo estilo do feedback-continue-btn */
+#ending-replay-btn {
+  font-family: var(--font);
+  font-size: 13px; color: #0a0a18;
+  background: linear-gradient(180deg, #ffe830 0%, #e8c000 100%);
+  border: 3px solid var(--gba-border2);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    0 0 12px rgba(255,220,0,0.3);
+  padding: 12px 24px; cursor: pointer;
+  letter-spacing: 1px; margin-top: 6px;
+  transition: all 0.1s;
+}
+#ending-replay-btn:hover {
+  background: linear-gradient(180deg, #fff 0%, #ffec50 100%);
+  box-shadow: 0 0 20px rgba(255,220,0,0.5);
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   12. UTILITÁRIOS E ANIMAÇÕES GLOBAIS
+   Classes e keyframes reutilizados em todo o projeto.
+   ───────────────────────────────────────────────────────────── */
+
+/* .hidden é a classe utilitária principal do jogo.
+   !important garante que sobrepõe qualquer display definido inline ou por outra classe.
+   O JS adiciona/remove essa classe para mostrar/esconder cada tela. */
+.hidden { display: none !important; }
+
+/* Piscar: alterna opacidade entre 1 e 0.
+   step-end faz a troca ser instantânea (sem suavização) — estilo retrô */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Pulso suave: escala levemente para cima e volta (respiração) */
+@keyframes pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.04); }
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   13. RESPONSIVIDADE (MOBILE)
+   Adaptações para telas com largura ≤ 700px.
+   Reduz fontes, reorganiza o layout dos cards em coluna
+   e oculta elementos desnecessários em telas pequenas.
+   ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 700px) {
+
+  /* ── Tela de Título ── */
+  .logo-chrono, .logo-byte { font-size: 36px; } /* Logo menor */
+  #title-content { min-width: 320px; padding: 20px 24px; }
+  #title-sub { font-size: 11px; }
+  #title-intro-text { font-size: 10px; }
+  #title-press-start { font-size: 10px; }
+
+  /* ── Seleção de Dificuldade ──
+     Em mobile, os cards empilham verticalmente (flex-direction: column)
+     em vez de ficarem lado a lado */
+  #diff-cards { flex-direction: column; align-items: center; }
+  .diff-card  { width: 100%; max-width: 320px; }
+  #diff-content { padding: 28px 20px 24px; gap: 20px; }
+  #diff-title { font-size: 14px; }
+
+  /* ── Quiz ──
+     Em mobile, as 4 alternativas ficam em coluna única (1fr) em vez de grade 2×2 */
+  #quiz-options-grid { grid-template-columns: 1fr; }
+
+  /* ── HUD ──
+     Oculta o badge de dificuldade para economizar espaço no HUD mobile */
+  #hud-diff-badge { display: none !important; }
+  #era-name { font-size: 12px; }
+}

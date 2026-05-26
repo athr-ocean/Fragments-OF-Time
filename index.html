@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fragments of Time</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="title-screen">
+    <div id="title-scanlines"></div>
+    <div id="title-content">
+      <div id="title-logo">
+        <span class="logo-chrono">FRAGMENTS OF</span>
+        <span class="logo-byte"> TIME</span>
+      </div>
+      <div id="title-sub">A MÁQUINA DO TEMPO DISCRETA</div>
+      <div id="title-intro-text">
+        <p>Seu avô, o Prof. Augusto,</p>
+        <p>é um inventor genial...</p>
+        <p>mas hoje ele precisa de você.</p>
+      </div>
+      <div id="title-press-start">PRESSIONE  ENTER  PARA  COMEÇAR</div>
+      <div id="title-footer">© 2026 FOT  •  HISTÓRIA DA COMPUTAÇÃO</div>
+    </div>
+  </div>
+
+  <div id="difficulty-screen" class="hidden">
+    <div id="diff-bg"></div>
+    <div id="diff-content">
+      <div id="diff-header">
+        <div id="diff-title-icon">⚙️</div>
+        <h1 id="diff-title">ESCOLHA A DIFICULDADE</h1>
+        <p id="diff-subtitle">Cada nível tem perguntas exclusivas</p>
+      </div>
+
+      <div id="diff-cards">
+        <button class="diff-card" data-difficulty="easy" id="diff-easy">
+          <div class="diff-card-glow diff-glow-easy"></div>
+          <div class="diff-card-inner">
+            <div class="diff-card-icon">😊</div>
+            <div class="diff-card-name diff-name-easy">FÁCIL</div>
+            <div class="diff-card-divider"></div>
+            <div class="diff-stat-row">
+              <span class="diff-stat-label">VIDAS</span>
+              <span class="diff-stat-val diff-val-easy">♥ ♥ ♥</span>
+            </div>
+            <div class="diff-stat-row">
+              <span class="diff-stat-label">TEMPO</span>
+              <span class="diff-stat-val">45 seg</span>
+            </div>
+            <div class="diff-stat-row">
+              <span class="diff-stat-label">PONTOS</span>
+              <span class="diff-stat-val">+100</span>
+            </div>
+            <div class="diff-card-desc">Perguntas introdutórias<br>ideais para aprender</div>
+          </div>
+        </button>
+
+        <button class="diff-card diff-card-featured" data-difficulty="medium" id="diff-medium">
+          <div class="diff-card-glow diff-glow-medium"></div>
+          <div class="diff-featured-badge">RECOMENDADO</div>
+          <div class="diff-card-inner">
+            <div class="diff-card-icon">🤔</div>
+            <div class="diff-card-name diff-name-medium">MÉDIO</div>
+            <div class="diff-card-divider"></div>
+            <div class="diff-stat-row">
+              <span class="diff-stat-label">VIDAS</span>
+              <span class="diff-stat-val diff-val-medium">♥ ♥</span>
+            </div>
+            <div class="diff-stat-row">
+              <span class="diff-stat-label">TEMPO</span>
+              <span class="diff-stat-val">25 seg</span>
+            </div>
+            <div class="diff-stat-row">
+              <span class="diff-stat-label">PONTOS</span>
+              <span class="diff-stat-val">+200</span>
+            </div>
+            <div class="diff-card-desc">Perguntas intermediárias<br>o desafio equilibrado</div>
+          </div>
+        </button>
+
+        <button class="diff-card" data-difficulty="hard" id="diff-hard">
+          <div class="diff-card-glow diff-glow-hard"></div>
+          <div class="diff-card-inner">
+            <div class="diff-card-icon">💀</div>
+            <div class="diff-card-name diff-name-hard">DIFÍCIL</div>
+            <div class="diff-card-divider"></div>
+            <div class="diff-stat-row">
+              <span class="diff-stat-label">VIDAS</span>
+              <span class="diff-stat-val diff-val-hard">♥</span>
+            </div>
+            <div class="diff-stat-row">
+              <span class="diff-stat-label">TEMPO</span>
+              <span class="diff-stat-val">15 seg</span>
+            </div>
+            <div class="diff-stat-row">
+              <span class="diff-stat-label">PONTOS</span>
+              <span class="diff-stat-val">+350</span>
+            </div>
+            <div class="diff-card-desc">Perguntas avançadas<br>para verdadeiros experts</div>
+          </div>
+        </button>
+      </div>
+
+      <p id="diff-hint">Clique num cartão ou use ◀ ▶ + ENTER</p>
+    </div>
+  </div>
+
+  <div id="cutscene-screen" class="hidden">
+    <div id="cutscene-bg"></div>
+    <div id="cutscene-panel">
+      <div id="cutscene-scene"></div>
+      <div id="cutscene-dialog-box">
+        <div id="cutscene-portrait-wrap">
+          <div id="cutscene-portrait"></div>
+          <div id="cutscene-portrait-name"></div>
+        </div>
+        <div id="cutscene-text-area">
+          <p id="cutscene-text"></p>
+        </div>
+        <div id="cutscene-arrow">▼</div>
+      </div>
+      <div id="cutscene-hint">ENTER / ESPAÇO para avançar</div>
+    </div>
+  </div>
+
+  <div id="game-wrapper" class="hidden">
+    <div id="era-banner">
+      <div id="era-icon"></div>
+      <div id="era-info">
+        <div id="era-name">GARAGEM DO AVÔ</div>
+        <div id="era-year">2026</div>
+      </div>
+      <div id="hud-right">
+        <span id="hud-diff-badge"></span>
+        <span id="hud-lives"></span>
+        <span id="hud-score">⭐ 0</span>
+        <span id="hud-progress">🔧 0/5</span>
+      </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="ui-container" class="hidden">
+      <div id="dialog-box" style="display:none">
+        <div id="dialog-left">
+          <div id="dialog-portrait-frame">
+            <canvas id="dialog-portrait-canvas" width="64" height="64"></canvas>
+          </div>
+          <div id="dialog-portrait-label"></div>
+        </div>
+        <div id="dialog-right">
+          <div id="dialog-speaker-name"></div>
+          <div id="dialog-text-area">
+            <p id="dialog-text"></p>
+          </div>
+        </div>
+        <div id="dialog-arrow-indicator">▼</div>
+      </div>
+
+      <div id="quiz-panel" class="hidden">
+        <div id="quiz-header">
+          <span id="quiz-epoch-label"></span>
+          <span id="quiz-machine-label"></span>
+          <div id="quiz-timer-wrap">
+            <div id="quiz-timer-fill" class="timer-fill timer-ok"></div>
+            <span id="quiz-timer-count">—</span>
+          </div>
+        </div>
+        <div id="quiz-question-wrap">
+          <p id="quiz-question"></p>
+        </div>
+        <div id="quiz-options-grid"></div>
+      </div>
+
+      <div id="feedback-panel" class="hidden">
+        <div id="feedback-header">
+          <span id="feedback-icon"></span>
+          <span id="feedback-title"></span>
+        </div>
+        <div id="feedback-curiosity-wrap">
+          <p id="feedback-curiosity"></p>
+        </div>
+        <div id="feedback-footer">
+          <div id="feedback-repair-bar">
+            <div id="feedback-repair-label">MÁQUINA DO TEMPO:</div>
+            <div id="repair-bar-track">
+              <div id="repair-bar-fill"></div>
+            </div>
+            <div id="repair-percent">0%</div>
+          </div>
+          <button id="feedback-continue-btn">CONTINUAR  ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="controls-bar">
+      <span>⬆⬇⬅➡ MOVER</span>
+      <span>E / ESPAÇO  INTERAGIR</span>
+    </div>
+  </div>
+
+  <div id="ending-screen" class="hidden">
+    <div id="ending-bg"></div>
+    <div id="ending-content">
+      <div id="ending-badge">🏆</div>
+      <p id="ending-title">MISSÃO COMPLETA!</p>
+      <p id="ending-sub">A Máquina do Tempo foi consertada!</p>
+      <canvas id="abraco-canvas" width="200" height="140"></canvas>
+      <div id="ending-divider"></div>
+      <p id="ending-flavor">
+        O Prof. Augusto abraça o neto com lágrimas nos olhos.<br>
+        "Você viajou por toda a história da computação!<br>
+        Agora sim podemos ir onde quisermos no tempo!"
+      </p>
+      <div id="ending-stats">
+        <div class="stat-row">
+          <span>DIFICULDADE</span>
+          <span id="end-difficulty">—</span>
+        </div>
+        <div class="stat-row">
+          <span>PONTUAÇÃO FINAL</span>
+          <span id="end-score">0</span>
+        </div>
+        <div class="stat-row">
+          <span>COMPUTADORES</span>
+          <span id="end-machines">0/5</span>
+        </div>
+        <div class="stat-row">
+          <span>ACERTOS</span>
+          <span id="end-hits">0</span>
+        </div>
+      </div>
+      <button id="ending-replay-btn">▶  JOGAR NOVAMENTE</button>
+    </div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
